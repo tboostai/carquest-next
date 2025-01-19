@@ -1,185 +1,377 @@
 "use client";
 
 import Image from "next/image";
-import { useRouter, useParams } from 'next/navigation';
-import { useState } from 'react';
+import { useRouter, useParams } from "next/navigation";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import NavBar from "@/app/components/NavBar";
 import Footer from "@/app/components/Footer";
 
+type TabType = 'Original' | 'Summary';
+
 export default function DetailsPage() {
   const params = useParams();
-  const { id } = params; // use this id if needed
+  const { id } = params;
   const router = useRouter();
+  console.log("id:", id);
 
-  console.log('id:', id);
+  const [isFavorite, setIsFavorite] = useState(true);
+  const [activeImage, setActiveImage] = useState({ src: `carmain${id}.png`, index: 0 });
+  const [activeTab, setActiveTab] = useState<TabType>('Original');
+  const [isExpanded, setIsExpanded] = useState(true);
 
-  // Example state from Vue code
-  const [aixin, setAixin] = useState(true);
-  const [main, setMain] = useState({ src: 'cars_0.png', count: 0 });
-
-  const lis = [
-    { id:0,src:'cars_0.png' },
-    { id:1,src:'cars_1.png' },
-    { id:2,src:'cars_4.png' },
-    { id:3,src:'cars_3.png' },
-    { id:4,src:'cars_2.png' },
+  const carImages = [
+    { id: 0, src: "cars_0.png" },
+    { id: 1, src: "cars_1.png" },
+    { id: 2, src: "cars_4.png" },
+    { id: 3, src: "cars_3.png" },
+    { id: 4, src: "cars_2.png" }
   ];
 
-  const icons = [
-    { id:0,src:'icon_0.png',word:'Fuel Type',text:'Hybrid' },
-    { id:1,src:'icon_1.png',word:'Mileage',text:'Hybrid' },
-    { id:2,src:'icon_2.png',word:'MPG',text:'58 MPG' },
-    { id:3,src:'icon_3.png',word:'Transmission',text:'Automatic' },
-    { id:4,src:'icon_4.png',word:'Exterior Color',text:'Navy' },
-    { id:5,src:'icon_5.png',word:'Interior',text:'Leather' },
-    { id:6,src:'icon_6.png',word:'Drivetrain',text:'Font Wheel Drive' },
-    { id:7,src:'icon_7.png',word:'Engine',text:'4-Cyl, 2.0L' },
+  const specifications = [
+    { id: 1, icon: "icon_1.png", label: "Mileage", value: "12,500 miles" },
+    { id: 3, icon: "icon_3.png", label: "Transmission", value: "Automatic" },
+    { id: 0, icon: "icon_0.png", label: "Fuel Type", value: "Hybrid" },
+    { id: 4, icon: "icon_4.png", label: "Exterior Color", value: "Navy" },
+    { id: 8, icon: "icon_7.png", label: "Interior Color", value: "Black" },
+    { id: 5, icon: "icon_5.png", label: "Interior", value: "Leather" },
   ];
 
   const cars = [
-    { id:0, name: '2023 Toyota Camry Hybrid',estimated: 'SE 45K miles', price: '$19,800', miles: '45K miles $409/mo', cash: '$0 cash down', milesAway: '10 miles away', src: '2023_toyota_camry-hybrid_sedan_se-nightshade_s_oem_1_1600x1067 1.png' },
-    { id:1, name: '2023 Toyota Camry Hybrid',estimated: 'SE 45K miles', price: '$19,800', miles: '45K miles $409/mo', cash: '$0 cash down', milesAway: '11 miles away', src: 'Screenshot 2024-10-04 at 4.01.16 PM 1.png' },
-    { id:2, name: '2021 Toyota Camry Hybrid',estimated: 'SE 90K miles', price: '$16,808', miles: '45K miles $409/mo', cash: '$0 cash down', milesAway: '19 miles away', src: 'Image 17 1.png' },
-    { id:3, name: '2023 Toyota Camry Hybrid',estimated: 'SE 40K miles', price: '$19,500', miles: '45K miles $409/mo', cash: '$0 cash down', milesAway: '21 miles away', src: 'Image 18 1.png' },
+    {
+      id: 0,
+      name: "2023 Toyota Camry Hybrid",
+      estimated: "SE 45K miles",
+      price: "$19,800",
+      miles: "45K miles $409/mo",
+      cash: "$0 cash down",
+      milesAway: "10 miles away",
+      src: "carmain0.png"
+    },
+    {
+      id: 1,
+      name: "2023 Toyota Camry Hybrid",
+      estimated: "SE 45K miles",
+      price: "$19,800",
+      miles: "45K miles $409/mo",
+      cash: "$0 cash down",
+      milesAway: "11 miles away",
+      src: "carmain1.png"
+    },
+    {
+      id: 2,
+      name: "2021 Toyota Camry Hybrid",
+      estimated: "SE 90K miles",
+      price: "$16,808",
+      miles: "45K miles $409/mo",
+      cash: "$0 cash down",
+      milesAway: "19 miles away",
+      src: "carmain2.png"
+    },
+    {
+      id: 3,
+      name: "2023 Toyota Camry Hybrid",
+      estimated: "SE 40K miles",
+      price: "$19,500",
+      miles: "45K miles $409/mo",
+      cash: "$0 cash down",
+      milesAway: "21 miles away",
+      src: "carmain3.png"
+    },
   ];
 
-  function changeAixin(){
-    setAixin(!aixin);
-  }
-
-  function changeSrc(src:string){
-    setMain(prev => ({...prev, src}));
-  }
-
-  function jump(){
-    router.push('/favorites');
-  }
-
-  function changeLi(i:number){
-    // If needed, handle state highlight logic here
-    console.log('change function, li:', i);
-  }
-
-  function changeSlider(flag:number){
-    setMain(prev=>{
-      let count = prev.count;
-      if(flag===0 && count>0){
-        count--;
-      } else if (flag===1 && count<lis.length-1){
-        count++;
-      }
-      return {...prev, count, src: lis[count].src};
-    });
+  function jump() {
+    router.push("/favorites");
   }
 
   return (
-    <div className="details min-h-screen flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <NavBar />
 
-      <div className="container mx-auto w-full md:w-1/2 p-4">
-        {/* Title */}
-        <div className="w-full mt-3 flex items-center">
-          <p className="text-xl font-bold flex-1 truncate">2023 Toyota Camry Hybrid</p>
-          <p className="text-xl font-bold flex-none">$19,800</p>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Location and Distance Info */}
+        <div className="mb-6">
+          <p className="text-gray-600 text-sm">SE • 45K miles</p>
+          <p className="text-gray-600 text-sm">Los Angeles, CA (10 miles away)</p>
         </div>
 
-        {/* Info */}
-        <div className="w-full mt-3 flex items-center h-12">
-          <div className="flex-1 h-full">
-            <p className="m-0 text-gray-500 text-sm">SE . 45K miles</p>
-            <p className="m-0 text-gray-500 text-sm">Los Angeles,CA(10 miles away)</p>
+        {/* Car Gallery Section */}
+        <div className="grid md:grid-cols-2 gap-8 mb-12">
+          <div className="space-y-4">
+            <div className="relative aspect-[16/10] rounded-xl overflow-hidden bg-gray-100 shadow-sm">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeImage.src}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="relative w-full h-full"
+                >
+                  <Image
+                    onClick={jump}
+                    src={`/images/${activeImage.src}`}
+                    alt="Car view"
+                    fill
+                    className="object-cover cursor-pointer"
+                    priority
+                  />
+                </motion.div>
+              </AnimatePresence>
+            </div>
+
+            <div className="flex space-x-3 overflow-x-auto pb-2">
+              {carImages.map((img, index) => (
+                <button
+                  key={img.id}
+                  onClick={() => setActiveImage({ src: img.src, index })}
+                  className={`relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 transition-all
+                    ${activeImage.index === index ? 'ring-2 ring-blue-600' : 'ring-1 ring-gray-200'}`}
+                >
+                  <Image 
+                    src={`/images/${img.src}`} 
+                    alt={`Car view ${index + 1}`} 
+                    fill 
+                    className="object-cover" 
+                  />
+                </button>
+              ))}
+            </div>
           </div>
-          <ul className="flex items-center h-full list-none m-0 p-0">
-            <li className="mx-1 flex flex-col justify-center items-center cursor-pointer">
-              <div className="flex justify-center items-center h-1/2">
-                <Image 
-                  src={`/images/${aixin ? 'Vector.png' : 'aixin.png'}`} 
-                  alt="favorite" 
-                  width={21} 
-                  height={19}
-                  onClick={changeAixin} 
-                />
-              </div>
-              <p className="text-[0.7rem] h-1/2 flex items-center">Favorite</p>
-            </li>
-            <li className="mx-1 flex flex-col justify-center items-center cursor-pointer">
-              <div className="flex justify-center items-center h-1/2 text-2xl font-bold">+</div>
-              <p className="text-[0.7rem] h-1/2 flex items-center">Compare</p>
-            </li>
-          </ul>
-        </div>
 
-        {/* Slider Section */}
-        <div className="mt-3" style={{height:'18rem'}}>
-          <div className="w-full flex items-center h-[70%]">
-            <div className="flex-1 flex items-center justify-center text-2xl font-bold cursor-pointer" onClick={()=>changeSlider(0)}> &lt; </div>
-            <div className="flex-8 flex items-center justify-center h-full">
-              <div className="w-full h-full flex justify-center items-center cursor-pointer" onClick={jump}>
-                <Image 
-                  src={`/images/${main.src}`} 
-                  alt="car image" 
-                  width={300} 
-                  height={200} 
-                  className="rounded object-contain" 
-                />
+          {/* Car Details */}
+          <div className="space-y-6">
+            <div className="flex justify-between items-start">
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">2024 Toyota Camry Hybrid</h1>
+                <p className="text-xl font-semibold text-[#2d5181]">$32,995</p>
+              </div>
+              <div className="flex gap-4 items-center">
+                <button
+                  onClick={() => setIsFavorite(!isFavorite)}
+                  className="flex flex-col items-center justify-center h-14 w-14"
+                >
+                  <div className="h-6 flex items-center justify-center">
+                    <motion.svg
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      className={`w-6 h-6 ${isFavorite ? "text-red-500 fill-current" : "text-gray-400"}`}
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                      />
+                    </motion.svg>
+                  </div>
+                  <span className="text-xs text-gray-500 mt-1">Favorite</span>
+                </button>
+                <button className="flex flex-col items-center justify-center h-14 w-14">
+                  <div className="h-6 flex items-center justify-center">
+                    <span className="text-2xl font-bold text-gray-400 leading-none">+</span>
+                  </div>
+                  <span className="text-xs text-gray-500 mt-1">Compare</span>
+                </button>
               </div>
             </div>
-            <div className="flex-1 flex items-center justify-center text-2xl font-bold cursor-pointer" onClick={()=>changeSlider(1)}>&gt;</div>
-          </div>
 
-          <div className="w-full mt-2 h-[30%] relative">
-            <ul className="absolute flex gap-2 list-none p-0 m-0" style={{width:'130%'}}>
-              {lis.map(item=>(
-                <li key={item.id} className="w-20 h-20 flex items-center justify-center cursor-pointer" onClick={()=>changeSrc(item.src)}>
-                  <Image 
-                    src={`/images/${item.src}`} 
-                    alt="thumbnail"
-                    width={60} 
-                    height={60}
-                    className="object-contain"
-                  />
-                </li>
+            {/* Specifications Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {specifications.map(spec => (
+                <div
+                  key={spec.id}
+                  className="p-3 bg-white rounded-lg shadow-sm hover:shadow-md transition-all"
+                >
+                  <div className="flex items-center space-x-3">
+                    <Image
+                      src={`/images/${spec.icon}`}
+                      alt={spec.label}
+                      width={20}
+                      height={20}
+                      className="opacity-75"
+                    />
+                    <div>
+                      <p className="text-xs text-gray-500">{spec.label}</p>
+                      <p className="text-sm font-medium text-gray-900">{spec.value}</p>
+                    </div>
+                  </div>
+                </div>
               ))}
-            </ul>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex space-x-4">
+              <button className="flex-1 px-6 py-3 bg-[#2d5181] text-white rounded-lg hover:bg-[#1f4066] transition-colors font-medium">
+                Contact Dealer
+              </button>
+              <button className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                Share
+              </button>
+            </div>
           </div>
         </div>
 
         {/* Vehicle Highlights */}
-        <div className="icons_lis mt-4 text-xl font-semibold">
-          <p>Vehicle Highlights</p>
-          <ul className="flex justify-between items-center mx-auto mt-4" style={{width:'80%', height:'3rem'}}>
-            <li className="flex-1 h-full flex items-center justify-center">
-              <Image src="/images/Reliability badge.png" alt="" width={40} height={40}/>
-            </li>
-            <li className="flex-1 h-full flex items-center justify-center">
-              <Image src="/images/Fuel efficiency badge.png" alt="" width={40} height={40}/>
-            </li>
-            <li className="flex-1 h-full flex items-center justify-center">
-              <Image src="/images/Comfort badge.png" alt="" width={40} height={40}/>
-            </li>
-            <li className="flex-1 h-full flex items-center justify-center">
-              <Image src="/images/Safety badge.png" alt="" width={40} height={40}/>
-            </li>
-          </ul>
+        <section className="mb-12">
+          <h2 className="text-xl font-semibold text-gray-900 mb-6">Vehicle Highlights</h2>
+          <div className="grid grid-cols-4 gap-6 max-w-3xl mx-auto">
+            <div className="flex flex-col items-center text-center">
+              <Image 
+                src="/images/Reliability badge.png" 
+                alt="Reliability" 
+                width={48} 
+                height={48}
+                className="mb-2" 
+              />
+              <span className="text-sm text-gray-600">Reliability</span>
+            </div>
+            <div className="flex flex-col items-center text-center">
+              <Image 
+                src="/images/Fuel efficiency badge.png" 
+                alt="Fuel Efficiency" 
+                width={48} 
+                height={48}
+                className="mb-2" 
+              />
+              <span className="text-sm text-gray-600">Fuel Efficiency</span>
+            </div>
+            <div className="flex flex-col items-center text-center">
+              <Image 
+                src="/images/Comfort badge.png" 
+                alt="Comfort" 
+                width={48} 
+                height={48}
+                className="mb-2" 
+              />
+              <span className="text-sm text-gray-600">Comfort</span>
+            </div>
+            <div className="flex flex-col items-center text-center">
+              <Image 
+                src="/images/Safety badge.png" 
+                alt="Safety" 
+                width={48} 
+                height={48}
+                className="mb-2" 
+              />
+              <span className="text-sm text-gray-600">Safety</span>
+            </div>
+          </div>
+        </section>
+
+        {/* Description */}
+        <div className="mt-8">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Description:</h2>
+          
+          <AnimatePresence>
+            {isExpanded && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="overflow-hidden"
+              >
+                {/* Tabs */}
+                <div className="flex w-full border-b border-gray-200 dark:border-gray-700 mb-6">
+                  <button
+                    onClick={() => setActiveTab('Original')}
+                    className={`flex-1 pb-4 text-sm font-medium transition-colors relative
+                      ${activeTab === 'Original'
+                        ? 'text-[#2d5181] dark:text-[#4b7ac7]'
+                        : 'text-gray-600 dark:text-gray-400'
+                      }`}
+                  >
+                    Original
+                    {activeTab === 'Original' && (
+                      <div className="absolute bottom-0 left-0 w-full h-0.5 bg-[#2d5181] dark:bg-[#4b7ac7]" />
+                    )}
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('Summary')}
+                    className={`flex-1 pb-4 text-sm font-medium transition-colors relative
+                      ${activeTab === 'Summary'
+                        ? 'text-[#2d5181] dark:text-[#4b7ac7]'
+                        : 'text-gray-600 dark:text-gray-400'
+                      }`}
+                  >
+                    Summary AI
+                    {activeTab === 'Summary' && (
+                      <div className="absolute bottom-0 left-0 w-full h-0.5 bg-[#2d5181] dark:bg-[#4b7ac7]" />
+                    )}
+                  </button>
+                </div>
+
+                {/* Content */}
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+                  {activeTab === 'Original' ? (
+                    <ul className="space-y-4 text-gray-600 dark:text-gray-300">
+                      <li>The property is a 2 bedroom, 3 bathroom townhouse.</li>
+                      <li>It has a brand new kitchen with quartz counters and new appliances.</li>
+                      <li>The main floor features oak hardwood flooring and a powder room.</li>
+                      <li>The main floor also has a large dining room and living room with a gas fireplace.</li>
+                      <li>The upstairs area includes a large principal bedroom with an ensuite and a large 2nd bedroom.</li>
+                      <li>The property is located in the Forest Hill strata with low maintenance fees.</li>
+                      <li>It comes with 2 parking stalls and a storage locker.</li>
+                    </ul>
+                  ) : (
+                    <div className="space-y-4 text-gray-600 dark:text-gray-300">
+                      <p>
+                        Modern 2-bed, 3-bath townhouse in Forest Hill featuring premium finishes including new kitchen 
+                        with quartz counters, oak hardwood floors, and gas fireplace. Includes parking and storage.
+                      </p>
+                      <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Key Features:</h3>
+                        <ul className="list-disc list-inside space-y-1">
+                          <li>New kitchen with modern appliances</li>
+                          <li>Hardwood flooring throughout main level</li>
+                          <li>Spacious primary suite with ensuite</li>
+                          <li>2 parking spots included</li>
+                          <li>Low maintenance fees</li>
+                        </ul>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Show More/Less Button */}
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="w-full mt-4 py-3 text-[#2d5181] dark:text-[#4b7ac7] border border-[#2d5181] dark:border-[#4b7ac7] 
+              rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-center"
+          >
+            {isExpanded ? 'Show Less' : 'Show More'}
+          </button>
         </div>
 
         {/* Overview and Features */}
-        <div className="icons_words mt-5 mb-3">
-          <p className="text-xl font-semibold">Overview and Features</p>
-          <ul className="flex flex-wrap justify-between list-none p-0 mt-4">
-            {icons.map(item=>(
-              <li key={item.id} className="flex items-center mb-3 w-1/2 md:w-1/4 h-[2.3rem]">
-                <div className="border border-gray-300 rounded-full w-10 h-10 flex items-center justify-center">
-                  <Image src={`/images/${item.src}`} alt="" width={20} height={20}/>
+        <section className="mb-12">
+          <h2 className="text-xl font-semibold text-gray-900 mb-6">Overview and Features</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {specifications.map(item => (
+              <div key={item.id} className="flex items-center space-x-3">
+                <div className="flex-shrink-0 w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center">
+                  <Image 
+                    src={`/images/${item.icon}`} 
+                    alt={item.label} 
+                    width={20} 
+                    height={20}
+                    className="opacity-75" 
+                  />
                 </div>
-                <div className="ml-2 text-sm">
-                  <p className="font-bold m-0 p-0" style={{fontSize:'0.9rem'}}>{item.word}</p>
-                  <p className="m-0 p-0 text-gray-500" style={{fontSize:'0.7rem'}}>{item.text}</p>
+                <div>
+                  <p className="font-medium text-sm text-gray-900">{item.label}</p>
+                  <p className="text-sm text-gray-500">{item.value}</p>
                 </div>
-              </li>
+              </div>
             ))}
-          </ul>
-        </div>
+          </div>
+        </section>
 
         {/* History */}
         <div className="word mb-5">
@@ -188,7 +380,7 @@ export default function DetailsPage() {
             <div className="flex flex-wrap">
               <div className="w-full md:w-1/3 mt-3 px-2 flex gap-2">
                 <div className="mt-1">
-                  <Image src="/images/Checkmark Outline.png" alt="" width={16} height={16}/>
+                  <Image src="/images/Checkmark Outline.png" alt="" width={16} height={16} />
                 </div>
                 <div>
                   <p className="m-0 p-0 text-sm">Clean Title</p>
@@ -197,7 +389,7 @@ export default function DetailsPage() {
               </div>
               <div className="w-full md:w-1/3 mt-3 px-2 flex gap-2">
                 <div className="mt-1">
-                  <Image src="/images/Checkmark Outline.png" alt="" width={16} height={16}/>
+                  <Image src="/images/Checkmark Outline.png" alt="" width={16} height={16} />
                 </div>
                 <div>
                   <p className="m-0 p-0 text-sm">0 Accidents</p>
@@ -206,7 +398,7 @@ export default function DetailsPage() {
               </div>
               <div className="w-full md:w-1/3 mt-3 px-2 flex gap-2">
                 <div className="mt-1">
-                  <Image src="/images/Checkmark Outline.png" alt="" width={16} height={16}/>
+                  <Image src="/images/Checkmark Outline.png" alt="" width={16} height={16} />
                 </div>
                 <div>
                   <p className="m-0 p-0 text-sm">1 Previous Owner</p>
@@ -217,122 +409,80 @@ export default function DetailsPage() {
           </div>
         </div>
 
-        {/* Seller Info */}
-        <div className="from mb-5">
-          <div className="from_box w-full h-36 flex">
-            <div className="from_box_left bg-[#2d5181] flex-1.2 p-2 text-white">
-              <p className="text-lg font-bold m-0">Seller Information</p>
-              <div className="h-[70%] mt-2">
-                <Image src="/images/from.png" alt="" width={200} height={80} className="object-contain"/>
-              </div>
-            </div>
-            <div className="from_box_right flex-1 relative flex items-end justify-center">
-              <Image src="/images/shot.png" alt="" width={300} height={144} className="object-cover"/>
-              <button className="absolute bottom-2 bg-white border-none px-8 py-2 rounded-full">Contact</button>
-            </div>
+        {/* You Might Also Like Section */}
+        <section className="mt-12 mb-16">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-semibold text-gray-900">You Might Also Like</h2>
+            <button className="text-sm text-[#2d5181] hover:text-[#1f4066] transition-colors">
+              View All
+            </button>
           </div>
-        </div>
 
-        {/* Build Your Offer */}
-        <div className="cards mt-5">
-          <div className="card border p-5 text-center">
-            <p className="text-xl font-semibold">Build Your Offer</p>
-            <ul className="change flex border rounded-full mx-auto mt-4 w-52 h-10 list-none">
-              <li onClick={()=>changeLi(0)} className="flex-1 flex items-center justify-center text-sm cursor-pointer">Lease/finance</li>
-              <li onClick={()=>changeLi(1)} className="flex-1 flex items-center justify-center text-sm cursor-pointer">Buy cash</li>
-            </ul>
-            <div className="pl-4 text-left mt-5">
-              <p className="mt-5 text-sm">Listing price</p>
-              <p className="text-sm">Down payment</p>
-              <input type="text" className="w-[90%] border p-1 rounded" />
-              <p className="mt-4 text-sm">Estimated trade-in value</p>
-              <input type="text" className="w-[90%] border p-1 rounded" />
-              <p className="mt-4 text-sm">Term</p>
-              <input type="text" className="w-[90%] border p-1 rounded" />
-              <div className="flex justify-between mt-4 w-[90%] text-sm">
-                <p>Taxes & Fees</p>
-                <p className="underline cursor-pointer">Calculate</p>
-              </div>
-              <div className="flex justify-center mt-4 w-[90%] gap-4">
-                <button className="px-4 py-1 border border-black rounded-full text-sm">Calculate</button>
-                <button className="px-4 py-1 border border-black rounded-full text-sm">Send offer</button>
-              </div>
-            </div>
-          </div>
-        </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {cars.map(car => (
+              <motion.div
+                key={car.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                whileHover={{ y: -4 }}
+                onClick={() => router.push(`/details/${car.id}`)}
+                className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden cursor-pointer"
+              >
+                {/* Car Image */}
+                <div className="relative aspect-[4/3] overflow-hidden bg-gray-100">
+                  <Image
+                    src={`/images/${car.src}`}
+                    alt={car.name}
+                    fill
+                    className="object-cover transform group-hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
 
-        {/* Peace of Mind Section */}
-        <div className="icon_s mt-5 text-center">
-          <p className="text-lg font-semibold">Have Peace of Mind When You Buy</p>
-          <ul className="items flex flex-wrap gap-10 mt-4 justify-center list-none p-0">
-            <li className="bg-[#f5f5f5] shadow rounded p-2 flex w-40 h-24">
-              <div className="imgI flex-4 flex items-center justify-center">
-                <Image src="/images/noun_0.png" alt="" width={40} height={40}/>
-              </div>
-              <div className="txt flex-6 pl-2 text-sm">
-                <p className="m-0 font-bold">Factory</p>
-                <p className="m-0 font-bold">Warranty</p>
-                <p className="m-0 text-xs underline">See details</p>
-              </div>
-            </li>
-            <li className="bg-[#f5f5f5] shadow rounded p-2 flex w-40 h-24">
-              <div className="imgI flex-4 flex items-center justify-center">
-                <Image src="/images/noun_1.png" alt="" width={40} height={40}/>
-              </div>
-              <div className="txt flex-6 pl-2 text-sm">
-                <p className="m-0 font-bold">Optional</p>
-                <p className="m-0 font-bold">add-on</p>
-                <p className="m-0 font-bold">protections</p>
-                <p className="m-0 text-xs underline">Explore</p>
-              </div>
-            </li>
-            <li className="bg-[#f5f5f5] shadow rounded p-2 flex w-40 h-24">
-              <div className="imgI flex-4 flex items-center justify-center">
-                <Image src="/images/noun_2.png" alt="" width={40} height={40}/>
-              </div>
-              <div className="txt flex-6 pl-2 text-sm">
-                <p className="m-0 font-bold">Free Carfax</p>
-                <p className="m-0 font-bold">ReportView</p>
-                <p className="m-0 text-xs underline">View</p>
-              </div>
-            </li>
-            <li className="bg-[#f5f5f5] shadow rounded p-2 flex w-40 h-24">
-              <div className="imgI flex-4 flex items-center justify-center">
-                <Image src="/images/noun_3.png" alt="" width={40} height={40}/>
-              </div>
-              <div className="txt flex-6 pl-2 text-sm">
-                <p className="m-0 font-bold">No Safety</p>
-                <p className="m-0 font-bold">Recalls</p>
-                <p className="m-0 text-xs underline">Explore</p>
-              </div>
-            </li>
-          </ul>
-        </div>
-
-        {/* You Might Also Like */}
-        <div className="car_lis_box mt-5">
-          <p className="text-xl font-semibold">You Might Also Like</p>
-          <ul className="flex flex-wrap list-none p-0 mt-4 gap-4">
-            {cars.map(item=>(
-              <li key={item.id} className="w-[48%] bg-white shadow border-4 border-black flex flex-col">
-                <Image src={`/images/${item.src}`} alt="" width={200} height={120} className="object-contain mx-auto mt-2"/>
-                <div className="btm flex w-full p-3 border-t-2 border-black h-32 text-xs">
-                  <div className="left w-1/2">
-                    <b className="block text-[0.6rem]">{item.name}</b>
-                    <p className="m-0 p-0 text-[0.6rem]">{item.estimated}</p>
-                    <p className="m-0 p-0 text-[0.6rem]">{item.price}</p>
+                {/* Car Info */}
+                <div className="p-4 space-y-3">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="font-medium text-gray-900 text-lg">{car.name}</h3>
+                      <p className="text-sm text-gray-500">{car.estimated}</p>
+                    </div>
+                    <p className="font-semibold text-[#2d5181]">
+                      {car.price}
+                    </p>
                   </div>
-                  <div className="right w-1/2 text-right">
-                    <p className="m-0 p-0 text-[0.6rem]">{item.miles}</p>
-                    <p className="m-0 p-0 text-[0.6rem]">{item.cash}</p>
-                    <p className="m-0 p-0 text-[0.6rem]">{item.milesAway}</p>
+
+                  <div className="space-y-1 text-sm text-gray-600">
+                    <p>{car.miles}</p>
+                    <p>{car.cash}</p>
+                    <div className="flex items-center text-xs text-gray-500">
+                      <svg
+                        viewBox="0 0 24 24"
+                        className="w-4 h-4 mr-1"
+                        fill="none"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                      </svg>
+                      {car.milesAway}
+                    </div>
                   </div>
                 </div>
-              </li>
+              </motion.div>
             ))}
-          </ul>
-        </div>
-      </div>
+          </div>
+        </section>
+      </main>
+
       <Footer />
     </div>
   );

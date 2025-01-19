@@ -19,3 +19,31 @@ body {
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+
+/* Add these custom styles to your globals.css */
+@layer base {
+  body {
+    @apply bg-gradient-to-br from-slate-900 to-slate-800 text-gray-100 min-h-screen;
+  }
+}
+
+@layer components {
+  .nav-link {
+    @apply hover:text-purple-400 transition-colors duration-200 relative after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-purple-400 after:transition-all hover:after:w-full;
+  }
+
+  .btn-primary {
+    @apply px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg shadow-lg transform hover:scale-105 transition-all duration-200 font-medium;
+  }
+
+  .card {
+    @apply bg-white/10 backdrop-blur-lg rounded-xl p-6 shadow-xl border border-white/10 hover:border-purple-500/50 transition-all duration-300;
+  }
+}
+
+@layer components {
+  .nav-link {
+    @apply text-gray-600 hover:text-blue-600 transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-blue-600 after:transition-all hover:after:w-full;
+  }
+}
